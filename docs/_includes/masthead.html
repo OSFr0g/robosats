@@ -11,6 +11,11 @@
           {{ site.masthead_title | default: site.title }}
           {% if site.subtitle %}<span class="site-subtitle">{{ site.subtitle }}</span>{% endif %}
         </a>
+        <select name="language" id="language">
+          <option value="en">EN</option>
+          <option value="es">ES</option>
+          <option value="fr">FR</option>
+        </select>
         <ul class="visible-links">
           {%- for link in site.data.navigation.main -%}
             <li class="masthead__menu-item">
@@ -33,3 +38,49 @@
     </div>
   </div>
 </div>
+
+<script>
+  const languageStored = localStorage.getItem('language') || 'en';
+  const languageSelect = document.getElementById('language');
+  languageSelect.value = languageStored || 'en';
+
+  switch(languageStored){
+    case 'es':
+      languageSelect.value = 'es';
+      matchPageWithSelection('es');
+      break;
+    case 'fr':
+      languageSelect.value = 'fr';
+      matchPageWithSelection('fr');
+      break;
+    default:
+      languageSelect.value = 'en';
+      matchPageWithSelection('en');
+      break;
+  }
+
+  languageSelect.addEventListener('change', (event) => {
+    const language = event.target.value;
+    localStorage.setItem('language', language);
+    matchPageWithSelection(language);
+  });
+
+  function matchPageWithSelection(language){
+    // checks if parameter is 'en', if so, removes it from the url
+    newLanguage = language === 'en' ? '' : `${language}`;
+    let currentUrl = window.location.href;
+    let regex = /(?:(?:(\/(?:docs|contribute|stats)\/))(?:(es|fr)\/)?(.*))|(\/(?:es|fr)\/|\/)$/
+    let [fullURL, first, urlLang = 'en', rest, home]  = regex.exec(currentUrl);
+
+    if (home) {
+      if ((home === '/' && language === 'en') || home.includes(language)) return;
+      window.location.href = `/${newLanguage}`;
+      return;
+    }
+    if (urlLang === language){
+      return;
+    } else {
+      window.location.href = `${first}${newLanguage}/${rest.replace(/\/$/, '')}`;
+    }
+  }
+</script>
